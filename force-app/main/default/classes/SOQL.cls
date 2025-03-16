@@ -16,7 +16,7 @@
  * Users of this class can expect to gain a solid understanding of SOQL in Apex and
  * be prepared to handle data retrieval tasks in Salesforce development.
  *
- * @author Your Name
+ * @author May Keam
  */
 
 public with sharing class SOQL {
@@ -27,9 +27,12 @@ public with sharing class SOQL {
 	 * @return List of all leads with Id, LastName, Company, Phone, Email
 	 * Update the corresponding test class and testGetAllLeads method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Lead> allLeads() {
+		List<Lead> allLeads = [SELECT Id, LastName, Company, Phone, Email
+							   FROM Lead
+							   WITH SECURITY_ENFORCED];
+		return allLeads;
+	}
 
 	/**
 	 * Question 2
@@ -38,9 +41,13 @@ public with sharing class SOQL {
 	 * @return A list of Contact records.
 	 * Update the corresponding test class and testGetContactsByFirstName method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Contact> contactFirstNameJohn() {
+		List<Contact> nameJohn = [SELECT Id, Name, FirstName
+								  FROM Contact
+								  WHERE FirstName = 'John'
+								  WITH SECURITY_ENFORCED];
+		return nameJohn;
+	}
 
 	/**
 	 * Question 3
@@ -49,9 +56,17 @@ public with sharing class SOQL {
 	 * @return A list of Contact Ids.
 	 * Update the corresponding test class and testGetContactIdsByLastName method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Id> contactSmithOrJones() {
+		List<Id> idSmithJones = new List<Id>();
+		List<Contact> lastNameSmithOrJones = [SELECT Id, Name, FirstName, LastName
+											  FROM Contact
+											  WHERE LastName = 'Smith' OR LastName = 'Jones'
+											  WITH SECURITY_ENFORCED];
+		for( Contact con : lastNameSmithOrJones ) {
+			idSmithJones.add(con.Id);
+		}
+		return idSmithJones;
+	}
 
 	/**
 	 * Question 4
@@ -62,9 +77,15 @@ public with sharing class SOQL {
 	 * @return A list of Opportunities with important opportunities fields
 	 * Update the corresponding test class and testGetClosedWonOpportunityCountByAccount method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Opportunity> closedWonOppsForAcct(Id accountId) {
+		//List<Opportunity> closedWonOpps = new List<Opportunity>();
+		List<Opportunity> opps = [SELECT Id, Name, Amount, CloseDate, StageName, Account.Name, Account.Id
+								  FROM Opportunity
+								  WHERE Account.Id = :accountId AND StageName = 'Closed Won'
+								  WITH SECURITY_ENFORCED];
+		
+		return opps;
+	}
 
 	/**
 	 * Question 5
@@ -73,9 +94,13 @@ public with sharing class SOQL {
 	 * @return The Integer count of Account records.
 	 * Update the corresponding test class and testGetAccountCount method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static Integer countOfAccounts() {
+		AggregateResult result = [SELECT COUNT(Id) totalAccounts
+								  FROM Account
+								  WITH SECURITY_ENFORCED];
+		Integer total = (Integer)result.get('totalAccounts');
+		return total;
+	}
 
 	/**
 	 * Question 6
