@@ -28,10 +28,9 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetAllLeads method to cover this method
 	 */
 	public static List<Lead> allLeads() {
-		List<Lead> allLeads = [SELECT Id, LastName, Company, Phone, Email
-							   FROM Lead
-							   WITH SECURITY_ENFORCED];
-		return allLeads;
+		return [SELECT Id, LastName, Company, Phone, Email
+				FROM Lead
+				WITH SECURITY_ENFORCED];
 	}
 
 	/**
@@ -42,11 +41,10 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetContactsByFirstName method to cover this method
 	 */
 	public static List<Contact> contactFirstNameJohn() {
-		List<Contact> nameJohn = [SELECT Id, Name, FirstName
-								  FROM Contact
-								  WHERE FirstName = 'John'
-								  WITH SECURITY_ENFORCED];
-		return nameJohn;
+		return [SELECT Id, Name, FirstName
+				FROM Contact
+				WHERE FirstName = 'John'
+				WITH SECURITY_ENFORCED];
 	}
 
 	/**
@@ -78,13 +76,10 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetClosedWonOpportunityCountByAccount method to cover this method
 	 */
 	public static List<Opportunity> closedWonOppsForAcct(Id accountId) {
-		//List<Opportunity> closedWonOpps = new List<Opportunity>();
-		List<Opportunity> opps = [SELECT Id, Name, Amount, CloseDate, StageName, Account.Name, Account.Id
-								  FROM Opportunity
-								  WHERE Account.Id = :accountId AND StageName = 'Closed Won'
-								  WITH SECURITY_ENFORCED];
-		
-		return opps;
+		return [SELECT Id, Name, Amount, CloseDate, StageName, Account.Name, Account.Id
+				FROM Opportunity
+				WHERE Account.Id = :accountId AND StageName = 'Closed Won'
+				WITH SECURITY_ENFORCED];
 	}
 
 	/**
@@ -98,8 +93,7 @@ public with sharing class SOQL {
 		AggregateResult result = [SELECT COUNT(Id) totalAccounts
 								  FROM Account
 								  WITH SECURITY_ENFORCED];
-		Integer total = (Integer)result.get('totalAccounts');
-		return total;
+		return (Integer)result.get('totalAccounts');
 	}
 
 	/**
@@ -120,9 +114,12 @@ public with sharing class SOQL {
 	 * @return A list of Contact records.
 	 * Update the corresponding test class and testGetContactsByEmailDomain method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Contact> myContactEmails(){
+		return [SELECT Id, Name, Email
+				FROM Contact
+				WHERE Email LIKE '%example.com'
+				WITH SECURITY_ENFORCED];
+	}
 
 	/**
 	 * Question 8
@@ -132,7 +129,12 @@ public with sharing class SOQL {
 	 * @return A list of Opportunity records.
 	 */
 	public static List<Opportunity> getOpportunitiesByNameKeyword(String keyword) {
-		return null; // Replace null with the variable you used to store the result
+		String findKeyword = '%' + keyword + '%';
+		return [SELECT Id, Name
+				FROM Opportunity
+				WHERE Name LIKE :findKeyword
+				WITH SECURITY_ENFORCED];
+		// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -141,7 +143,11 @@ public with sharing class SOQL {
 	 * @return A list of Case records.
 	 */
 	public static List<Case> getFilterCaseOrigins() {
-		return null; // Replace null with the variable you used to store the result
+		return [SELECT CaseNumber, Origin
+				FROM Case
+				WHERE Origin != 'Web' AND Origin != 'Email' AND Origin != ''
+				WITH SECURITY_ENFORCED];
+		// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -154,9 +160,15 @@ public with sharing class SOQL {
 	 * @return A list of Lead records.
 	 * Update the corresponding test class and testGetLeadsBySourceOrTitle method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static List<Lead> leadSourceTitle(String source, String title){
+		String titleKeyWord = '%' + title + '%';
+		return [SELECT LeadSource, Title, Company, Phone, Email, LastName
+				FROM Lead
+				WHERE LeadSource = :source
+				OR Title LIKE :titleKeyWord
+				WITH SECURITY_ENFORCED];
+		
+	}
 
 	/**
 	 * Question 11

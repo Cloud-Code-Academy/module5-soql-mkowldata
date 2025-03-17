@@ -11,7 +11,7 @@
 public with sharing class SOQLTest {
 	@IsTest
 	static void testGetAllLeads() {
-		// Create test data
+		// Create test data 1
 		Lead testLead1 = new Lead(
 			LastName = 'Test Lead 1',
 			Company = 'Test Company 1',
@@ -48,7 +48,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetContactsByFirstName() {
-		// Create test data
+		// Create test data 2
 		Contact testContact1 = new Contact(FirstName = 'John', LastName = 'Doe');
 		Contact testContact2 = new Contact(FirstName = 'John', LastName = 'Smith');
 		Contact testContact3 = new Contact(FirstName = 'Jane', LastName = 'Doe');
@@ -73,7 +73,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetContactIdsByLastName() {
-		// Create test data
+		// Create test data 3
 		Contact testContact1 = new Contact(FirstName = 'John', LastName = 'Smith');
 		Contact testContact2 = new Contact(FirstName = 'Jane', LastName = 'Jones');
 		Contact testContact3 = new Contact(FirstName = 'Jack', LastName = 'Doe');
@@ -92,7 +92,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetClosedWonOpportunityCountByAccount() {
-		// Create test data
+		// Create test data 4
 		Account testAccount = new Account(Name = 'Test Account');
 		insert testAccount;
 
@@ -142,7 +142,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetAccountCount() {
-		// Generate random number of test account between 1 and 10
+		// Generate random number of test account between 1 and 10  - 5
 		Integer numAccounts = (Integer) Math.floor(Math.random() * 10) + 1;
 		List<Account> accounts = new List<Account>();
 		for (Integer i = 0; i < numAccounts; i++) {
@@ -159,7 +159,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetTasksDueNextWeek() {
-		// Create test data
+		// Create test data 6
 		Task testTask1 = new Task(Subject = 'Test Task 1', ActivityDate = Date.today().addDays(7)); // due in 7 days
 		Task testTask2 = new Task(Subject = 'Test Task 2', ActivityDate = Date.today().addDays(10)); // due in 8 days, should not be returned
 		Task testTask3 = new Task(Subject = 'Test Task 3', ActivityDate = Date.today().addDays(2)); // due in 6 days
@@ -180,14 +180,14 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetContactsByEmailDomain() {
-		// Create test data
+		// Create test data 7
 		Contact testContact1 = new Contact(FirstName = 'John', LastName = 'Doe', Email = 'john@example.com');
 		Contact testContact2 = new Contact(FirstName = 'Jane', LastName = 'Smith', Email = 'jane@example.com');
 		Contact testContact3 = new Contact(FirstName = 'Jack', LastName = 'Brown', Email = 'jack@other.com');
 		insert new List<Contact>{ testContact1, testContact2, testContact3 };
 
 		// Call the method to test
-		List<Contact> contacts = null; //Replace null with your method call from SOQL class
+		List<Contact> contacts = SOQL.myContactEmails(); //Replace null with your method call from SOQL class
 
 		// Assert that the number of contacts returned is correct
 		System.assertEquals(2, contacts.size(), 'Number of contacts returned is incorrect.');
@@ -206,7 +206,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetOpportunitiesByNameKeyword() {
-		// Create test data
+		// Create test data 8
 		Account testAccount = new Account(Name = 'Test Account');
 		insert testAccount;
 
@@ -251,7 +251,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetFilterCaseOrigins() {
-		// Create test data
+		// Create test data 9
 		Account testAccount = new Account(Name = 'Test Account');
 		insert testAccount;
 
@@ -281,7 +281,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetLeadsBySourceOrTitle() {
-		// Create test data
+		// Create test data 10
 		Lead testLead1 = new Lead(
 			LastName = 'Test Lead 1',
 			Company = 'Test Company 1',
@@ -325,7 +325,7 @@ public with sharing class SOQLTest {
 		insert new List<Lead>{ testLead1, testLead2, testLead3, testLead4 };
 
 		// Call the method to test
-		List<Lead> leads = null; //Replace null with your method passing 'Web', 'Engineer'
+		List<Lead> leads = SOQL.leadSourceTitle('Web', 'Engineer'); //Replace null with your method passing 'Web', 'Engineer'
 
 		// Assert that the number of leads returned is correct
 		System.assertEquals(3, leads.size(), 'Number of leads returned is incorrect.');
@@ -346,7 +346,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetContactNamesByAccount() {
-		// Create test data
+		// Create test data 11
 		// Generate random number of accounts and contacts between 1 and 10
 		Integer numAccounts = (Integer) Math.floor(Math.random() * 10) + 1;
 		List<Account> accounts = new List<Account>();
@@ -393,7 +393,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetTotalRevenueByStage() {
-		// Create test data
+		// Create test data 12
 		Opportunity testOpp1 = new Opportunity(
 			Name = 'Test Opportunity 1',
 			StageName = 'Prospecting',
@@ -430,7 +430,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetFirstTenAccounts() {
-		// Create test data
+		// Create test data 13
 		List<Account> accounts = new List<Account>();
 		for (Integer i = 0; i < 15; i++) {
 			accounts.add(new Account(Name = 'Test Account ' + i));
@@ -454,7 +454,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetHighValueOpportunities() {
-		// Create test data
+		// Create test data 14
 		Account testAccount = new Account(Name = 'Test Account');
 		insert testAccount;
 
@@ -490,7 +490,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetBirthdateContacts() {
-		// Create test data
+		// Create test data 15
 		List<Contact> contacts = new List<Contact>();
 		for (Integer i = 0; i < 10; i++) {
 			contacts.add(
@@ -519,7 +519,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetCasesWithStatus() {
-		// Create test data
+		// Create test data 16
 		List<Case> cases = new List<Case>();
 		for (Integer i = 0; i < 20; i++) {
 			cases.add(
@@ -552,7 +552,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetCaseIdsByAccount() {
-		// Create test data
+		// Create test data 17
 		// Generate random number of accounts and cases between 1 and 10
 		Integer numAccounts = (Integer) Math.floor(Math.random() * 10) + 1;
 		List<Account> accounts = new List<Account>();
@@ -597,7 +597,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetAccountIdsToNamesNotInCountry() {
-		// Create test data
+		// Create test data 18
 		Account testAccount1 = new Account(Name = 'Test Account 1', BillingCountry = 'United States');
 		Account testAccount2 = new Account(Name = 'Test Account 2', BillingCountry = 'Canada');
 		Account testAccount3 = new Account(Name = 'Test Account 3', BillingCountry = 'United Kingdom');
@@ -621,7 +621,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetAccountNameForContact() {
-		// Create test data
+		// Create test data 19
 		Account testAccount1 = new Account(Name = 'Test Account 1');
 		insert testAccount1;
 
@@ -637,7 +637,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetAccountAndOpportunitiesFromAccountId() {
-		// Create test data
+		// Create test data 20
 		Account testAccount1 = new Account(Name = 'Test Account 1');
 		insert testAccount1;
 
@@ -675,7 +675,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetAccountsWithContactsByState() {
-		// Create test data
+		// Create test data 21
 		// Generate random number of accounts and contacts between 1 and 10
 		Integer numAccounts = (Integer) Math.floor(Math.random() * 10) + 1;
 		List<Account> accounts = new List<Account>();
@@ -723,7 +723,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testFindAccountsByLeadEmailDomains() {
-		// Create test data
+		// Create test data 22
 		// Generate random number of leads between 1 and 10
 		List<String> domains = new List<String>{ 'example.com', 'test.com', 'other.com' };
 
@@ -797,7 +797,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testCloneLineItems() {
-		// Create test data
+		// Create test data 23
 		Account testAccount1 = new Account(Name = 'Test Account 1');
 		insert testAccount1;
 
@@ -857,7 +857,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testGetOpportunityDetailsForClosedWon() {
-		// Create test data
+		// Create test data 24
 		Account testAccount1 = new Account(Name = 'Test Account 1');
 		insert testAccount1;
 
@@ -898,7 +898,7 @@ public with sharing class SOQLTest {
 
 	@IsTest
 	static void testSetPrimaryContact() {
-		// Create test data
+		// Create test data 25
 		Account testAccount1 = new Account(Name = 'Test Account 1');
 		Account testAccount2 = new Account(Name = 'Test Account 2');
 		insert new List<Account>{ testAccount1, testAccount2 };
