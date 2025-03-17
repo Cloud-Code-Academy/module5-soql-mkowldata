@@ -90,10 +90,10 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetAccountCount method to cover this method
 	 */
 	public static Integer countOfAccounts() {
-		AggregateResult result = [SELECT COUNT(Id) totalAccounts
+		AggregateResult[] result = [SELECT COUNT(Id) totalAccounts
 								  FROM Account
 								  WITH SECURITY_ENFORCED];
-		return (Integer)result.get('totalAccounts');
+		return (Integer)result[0].get('totalAccounts');
 	}
 
 	/**
@@ -179,15 +179,18 @@ public with sharing class SOQL {
 	 */
 	public static List<String> getContactNamesByAccount(Id accountId) {
 		// Create a list to hold the Contact LastNames
-
+		List<String> contactLastNames = new List<String>();
 		// Query the Contacts
+		List<Contact> contactsInAccount = [SELECT Id, LastName, AccountId
+										   FROM Contact
+										   WHERE AccountId = :accountId
+										   WITH SECURITY_ENFORCED];
 		// Loop through each Contact and add the LastName to the list
-		//for () {
-		//
-		//}
-
+		for (Contact con: contactsInAccount) {
+			contactLastNames.add(con.LastName);
+		}
 		// Return the list of Contact LastNames
-		return null; // Replace null with the variable you used to store the result
+		return contactLastNames; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -199,9 +202,13 @@ public with sharing class SOQL {
 	 */
 	public static Decimal getTotalRevenueByStage(String stage) {
 		// Use AggregateQuery to get the total revenue
-
+		AggregateResult[] groupedResults = [SELECT SUM(Amount)rev
+											FROM Opportunity
+											WHERE StageName = :stage
+											OR Amount > 10000
+											WITH SECURITY_ENFORCED];
 		// Return the total revenue
-		return null; // Replace null with the variable you used to store the result
+		return (Decimal)groupedResults[0].get('rev'); // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -210,7 +217,12 @@ public with sharing class SOQL {
 	 * @return A list of the first 10 Accounts ordered by Name.
 	 */
 	public static List<Account> getFirstTenAccounts() {
-		return null; // Replace null with the variable you used to store the result
+		return [SELECT Id, Name
+				FROM Account
+				WITH SECURITY_ENFORCED
+				ORDER BY Name ASC
+				LIMIT 10];
+	// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -219,7 +231,13 @@ public with sharing class SOQL {
 	 * @return A list of Opportunities with an Amount greater than 100,000, ordered by CloseDate, and limited to 5 records.
 	 */
 	public static List<Opportunity> getHighValueOpportunities() {
-		return null; // Replace null with the variable you used to store the result
+		return [SELECT AccountId, Name, CloseDate, StageName, Amount
+				FROM Opportunity
+				WHERE Amount > 100000
+				WITH SECURITY_ENFORCED
+				ORDER BY CloseDate ASC
+				LIMIT 5];
+	// Replace null with the variable you used to store the result
 	}
 
 	/**
