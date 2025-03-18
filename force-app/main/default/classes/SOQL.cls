@@ -246,7 +246,16 @@ public with sharing class SOQL {
 	 * @return A list of Contacts
 	 */
 	public static List<Contact> getBirthdateContacts() {
-		return null; // Replace null with the variable you used to store the result
+		Date today = Date.today();
+		Integer currentMonth = today.month();
+		return [SELECT LastName, Birthdate
+				FROM Contact
+				WHERE Birthdate != null
+				AND CALENDAR_MONTH(Birthdate) = :currentMonth
+				WITH SECURITY_ENFORCED
+				ORDER BY Birthdate DESC
+				LIMIT 3]; 
+		// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -255,7 +264,14 @@ public with sharing class SOQL {
 	 * @return A list of Cases
 	 */
 	public static List<Case> getCasesWithStatus() {
-		return null; // Replace null with the variable you used to store the result
+		return [SELECT Status, CreatedDate
+				FROM Case
+				WHERE Status = 'Open'
+				WITH SECURITY_ENFORCED
+				ORDER BY CreatedDate ASC
+				LIMIT 10
+				OFFSET 5];
+		// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -267,14 +283,19 @@ public with sharing class SOQL {
 	 */
 	public static Set<Id> getCaseIdsByAccount(Id accountId) {
 		// Create a set to hold the Case Ids
-
+		Set<Id> myCasesForAcct = new Set<Id>();
 		// Query the Cases
+		List<Case> myCases = [SELECT Id, CaseNumber, Account.Id, Account.Name
+							  FROM Case
+							  WHERE Account.Id = :accountId
+							  WITH SECURITY_ENFORCED];
 		// Loop through each Case and add the Id to the set
-		//for () {
-		//
+		for(Case cases : myCases) {
+			myCasesForAcct.add(cases.Id);
+		}
 		//}
 
-		return null; // Replace null with the variable you used to store the result
+		return myCasesForAcct; // Replace null with the variable you used to store the result
 	}
 
 	/**
