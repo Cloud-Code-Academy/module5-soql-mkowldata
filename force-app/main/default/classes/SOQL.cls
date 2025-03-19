@@ -310,9 +310,15 @@ public with sharing class SOQL {
 		Map<Id, String> accountIdsToNames = new Map<Id, String>();
 
 		// Query the Accounts
+		List<Account> myAccts = [SELECT Id, Name, BillingCountry
+								 FROM Account
+								 WHERE BillingCountry != :country
+								 WITH SECURITY_ENFORCED];
 		// Loop through each Account and add the Id and Name to the map
-
-		return null; // Replace null with the variable you used to store the result
+		for(Account acc : myAccts) {
+			accountIdsToNames.put(acc.Id, acc.Name);
+		}
+		return accountIdsToNames; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -323,7 +329,13 @@ public with sharing class SOQL {
 	 * @return The Account Name of the Contact.
 	 */
 	public static String getAccountNameForContact(String contactId) {
-		return null; // Replace null with the variable you used to store the result
+		List<Contact> myContact = [SELECT Id, LastName, AccountId, Account.Name
+								   FROM Contact
+								   WHERE Id = :contactId
+								   WITH SECURITY_ENFORCED
+								   LIMIT 1];
+		String myAcct = myContact[0].Account.Name;
+		return myAcct; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -334,7 +346,13 @@ public with sharing class SOQL {
 	 * @return An Account record with related Opportunities.
 	 */
 	public static Account getAccountAndOpportunitiesFromAccountId(Id accountId) {
-		return null; // Replace null with the variable you used to store the result
+		Account myAcct = [SELECT Id, Name, 
+						   (SELECT Id, Name FROm Opportunities)
+						  FROM Account
+						  WHERE Id = :accountId
+						  WITH SECURITY_ENFORCED
+						  LIMIT 1];
+		return myAcct; // Replace null with the variable you used to store the result
 	}
 
 	/**
