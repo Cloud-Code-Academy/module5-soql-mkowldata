@@ -103,9 +103,16 @@ public with sharing class SOQL {
 	 * @return A map of Task Ids to Task records.
 	 * Update the corresponding test class and testGetTasksDueNextWeek method to cover this method
 	 */
-	//[public | private ] [static] data_type method_name (input parameters) {
-	//  The body of the method
-	//}
+	public static Map<Id, Task> taskIdToTask() {
+		Map<Id, Task> idToTask = new Map<Id, Task>();
+		List<Task> myTasks = [SELECT Id, Subject, ActivityDate
+	  	  	  		          FROM Task
+			 		          WHERE ActivityDate = NEXT_N_Days:7];
+		for(Task tsk : myTasks) {
+			idToTask.put(tsk.Id, tsk);
+		}
+	return idToTask;
+	}
 
 	/**
 	 * Question 7
@@ -364,11 +371,22 @@ public with sharing class SOQL {
 	 */
 	public static List<Contact> getAccountsWithContactsByState(Id accountId) {
 		// Query the Account
+		Account acct = [SELECT Id, Name, BillingAddress
+					   FROM Account
+					   WHERE Id = :accountId
+					   WITH SECURITY_ENFORCED];
 
 		// Store the Account's BillingState
-
+		Address addr = (Address) acct.BillingAddress;
+		String acctState = addr.getState();
+		
 		// Query the Contacts
-		return null; // Replace null with the variable you used to store the result
+		List<Contact> myContacts = [SELECT Id, Name, MailingStreet, MailingState, AccountId
+								    FROM Contact
+									WHERE AccountId = :accountId
+									AND MailingState = :acctState
+									WITH SECURITY_ENFORCED];
+		return myContacts; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -381,21 +399,32 @@ public with sharing class SOQL {
 	 */
 	public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
 		// Query the Leads
-
-		// Create a set of email domains from the Leads
-
+		List<Lead> myLeads = [SELECT Id, Company, Email
+							  FROM Lead];
 		// Loop through each Lead
-
-		// Get the email from the Lead
-
 		// Check if the email is not null
-
+		for(Lead lead : myLeads) {
+			if(lead.Email != null) {
+				leadIds.add(lead.Id);
+			}
+		}
+		// Create a set of email domains from the Leads
+		Set<String> leadEmails = new Set<String>();
+		// Get the email from the Lead
 		// Add the email domain to the set
+		for(String str: leadIds) {
+			leadEmails.add(str.substringAfter('@'));
+		}
+		// Create set to hold website from account ids
+		List<Account> accountIds = new List<Account>();
 
 		// Query the Accounts
-		return null; // Replace null with the variable you used to store the result
+		List<Account> myLeadAccounts = [SELECT Id, Name, Website
+										FROM Account
+										WHERE Website IN:leadEmails];
+	 	return myLeadAccounts; // Replace null with the variable you used to store the result
 	}
-
+	
 	/**
 	 * Question 23
 	 * Clones and Inserts Opportunity Line Items from an original Opportunity to a list of cloned Opportunities.
