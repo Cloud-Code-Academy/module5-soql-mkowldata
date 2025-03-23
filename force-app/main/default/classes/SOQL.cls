@@ -175,7 +175,6 @@ public with sharing class SOQL {
 				WHERE LeadSource = :source
 				OR Title LIKE :titleKeyWord
 				WITH SECURITY_ENFORCED];
-		
 	}
 
 	/**
@@ -354,13 +353,13 @@ public with sharing class SOQL {
 	 * @return An Account record with related Opportunities.
 	 */
 	public static Account getAccountAndOpportunitiesFromAccountId(Id accountId) {
-		Account myAcct = [SELECT Id, Name, 
-						   (SELECT Id, Name FROm Opportunities)
-						  FROM Account
-						  WHERE Id = :accountId
-						  WITH SECURITY_ENFORCED
-						  LIMIT 1];
-		return myAcct; // Replace null with the variable you used to store the result
+		return [SELECT Id, Name, 
+				(SELECT Id, Name FROm Opportunities)
+				FROM Account
+				WHERE Id = :accountId
+				WITH SECURITY_ENFORCED
+				LIMIT 1];
+		// Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -372,22 +371,23 @@ public with sharing class SOQL {
 	 */
 	public static List<Contact> getAccountsWithContactsByState(Id accountId) {
 		// Query the Account
-		Account acct = [SELECT Id, Name, BillingAddress
-					   FROM Account
-					   WHERE Id = :accountId
-					   WITH SECURITY_ENFORCED];
-
-		// Store the Account's BillingState
-		Address addr = (Address) acct.BillingAddress;
-		String acctState = addr.getState();
-		
+		Account acct = [SELECT Id, Name, BillingState
+						FROM Account
+						WHERE Id = :accountId
+						WITH SECURITY_ENFORCED];		
 		// Query the Contacts
-		List<Contact> myContacts = [SELECT Id, Name, MailingStreet, MailingState, AccountId
+		List<Contact> myContacts = [SELECT Id, Name, MailingState, AccountId, Account.BillingState
 								    FROM Contact
-									WHERE AccountId = :accountId
-									AND MailingState = :acctState
-									WITH SECURITY_ENFORCED];
-		return myContacts; // Replace null with the variable you used to store the result
+									WHERE AccountId = :accountId];
+
+		List<Contact> contactsWithSameMailing = new List<Contact>();
+		for(Contact con : myContacts) {
+			if(con.MailingState == con.Account.BillingState) {
+				contactsWithSameMailing.add(con);
+			} 
+			continue;
+		}
+		return contactsWithSameMailing; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -425,11 +425,11 @@ public with sharing class SOQL {
 			websites.add('www.' + email);
 		}
 		// Query the Accounts
-		List<Account> myLeadAccounts = [SELECT Id, Name, Website
-										FROM Account
-										WHERE Website IN:websites
-										WITH SECURITY_ENFORCED];
-	 	return myLeadAccounts; // Replace null with the variable you used to store the result
+		return [SELECT Id, Name, Website
+				FROM Account
+				WHERE Website IN:websites
+				WITH SECURITY_ENFORCED];
+	 	// Replace null with the variable you used to store the result
 	}
 	
 	/**
@@ -521,8 +521,6 @@ public with sharing class SOQL {
 				accountToFirstContactMap.put(con.AccountId, con);
 			}
 		}
-		//Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>([SELECT Id, Primary_Contact__c FROM Opportunity]);
-
 		// Loop through each Opportunity
 		//Update the Opportunity primary contact from accountToContactMap
 		// Update the Opportunity primary contact from accountToContactMap		
@@ -535,6 +533,6 @@ public with sharing class SOQL {
 			}
 		}
 		// Update the Opportunities
-		database.update(oppsToUpdate, accessLevel.USER_MODE);
+		database.update(oppsToUpdate);
 	}
 }
