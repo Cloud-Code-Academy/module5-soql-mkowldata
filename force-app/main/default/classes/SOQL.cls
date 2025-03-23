@@ -107,7 +107,8 @@ public with sharing class SOQL {
 		Map<Id, Task> idToTask = new Map<Id, Task>();
 		List<Task> myTasks = [SELECT Id, Subject, ActivityDate
 	  	  	  		          FROM Task
-			 		          WHERE ActivityDate = NEXT_N_Days:7];
+			 		          WHERE ActivityDate = NEXT_N_Days:7
+							  WITH SECURITY_ENFORCED];
 		for(Task tsk : myTasks) {
 			idToTask.put(tsk.Id, tsk);
 		}
@@ -400,28 +401,34 @@ public with sharing class SOQL {
 	public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
 		// Query the Leads
 		List<Lead> myLeads = [SELECT Id, Company, Email
-							  FROM Lead];
+							  FROM Lead
+							  WHERE Id IN:leadIds
+							  WITH SECURITY_ENFORCED];
 		// Loop through each Lead
+		Set<String> myDomains = new Set<String>();
 		// Check if the email is not null
 		for(Lead lead : myLeads) {
 			if(lead.Email != null) {
-				leadIds.add(lead.Id);
+				myDomains.add(lead.Email);
 			}
 		}
 		// Create a set of email domains from the Leads
-		Set<String> leadEmails = new Set<String>();
+		Set<String> leadDomains = new Set<String>();
 		// Get the email from the Lead
 		// Add the email domain to the set
-		for(String str: leadIds) {
-			leadEmails.add(str.substringAfter('@'));
+		for(String str: myDomains) {
+			leadDomains.add(str.substringAfter('@'));
 		}
-		// Create set to hold website from account ids
-		List<Account> accountIds = new List<Account>();
-
+		// Create website based on email domain 
+		List<String> websites = new List<String>();
+		for(String email : leadDomains) {
+			websites.add('www.' + email);
+		}
 		// Query the Accounts
 		List<Account> myLeadAccounts = [SELECT Id, Name, Website
 										FROM Account
-										WHERE Website IN:leadEmails];
+										WHERE Website IN:websites
+										WITH SECURITY_ENFORCED];
 	 	return myLeadAccounts; // Replace null with the variable you used to store the result
 	}
 	
@@ -435,17 +442,38 @@ public with sharing class SOQL {
 	 */
 	public static void cloneLineItems(Id origOppId, List<Id> cloneOppIds) {
 		// Query the original Opportunity Line Items
-
+		List<OpportunityLineItem> myOppLineItems = [SELECT 
+														Id, 
+														Description, 
+														Product2Id, 
+														PricebookEntryId, 
+														Quantity, UnitPrice, 
+														Opportunity.Name, 
+														OpportunityId
+									 				FROM OpportunityLineItem
+													WHERE OpportunityId = :origOppId
+													WITH SECURITY_ENFORCED];
 		// Create a list to hold the new line items
-
+		List<OpportunityLineItem> clonedOppLineItems = new List<OpportunityLineItem>();
 		// Generate a random number between 1 and 3
-
+		for(Id cloneOppId : cloneOppIds) {
+		Integer randomnumber = (Integer) Math.floor(Math.random() * 3 + 1);
+							
+		for(OpportunityLineItem newOppLineItem : myOppLineItems) {
+			OpportunityLineItem clonedOppLineItem = new OpportunityLineItem();
+				clonedOppLineItem.Description = newOppLineItem.Description;
+				clonedOppLineItem.Product2Id = newOppLineItem.Product2Id;
+				clonedOppLineItem.Quantity = randomnumber;
+				clonedOppLineItem.UnitPrice = newOppLineItem.UnitPrice;
+				clonedOppLineItem.PricebookEntryId = newOppLineItem.PricebookEntryId;			
+				clonedOppLineItem.OpportunityId = cloneOppId;
+				clonedOppLineItems.add(clonedOppLineItem);
+		}
+		database.insert(clonedOppLineItems, accessLevel.USER_MODE);
+	}
 		// Loop through each cloned Opportunity Id
-
 		// Loop through each original line item
-
 		// Clone the original line item and add the random number to the quantity
-
 		// Insert the new line items
 	}
 
@@ -455,7 +483,10 @@ public with sharing class SOQL {
 	 * @return A list of filtered Opportunity
 	 */
 	public static List<Opportunity> getOpportunityDetailsForClosedWon() {
-		return null; // Replace null with the variable you used to store the result
+		return [SELECT Name, AccountId, Account.Name, Owner.UserName
+				FROM Opportunity
+				WHERE StageName = 'Closed Won'
+				WITH SECURITY_ENFORCED]; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -465,17 +496,45 @@ public with sharing class SOQL {
 	 */
 	public static void setPrimaryContact() {
 		//Use the getOpportunityDetailsForClosedWon() method to get the Opportunities
+		List<Opportunity> oppDetailsClosedWon = [SELECT Name, AccountId, Account.Name, Owner.UserName
+												 FROM Opportunity
+												 WHERE StageName = 'Closed Won'
+												 WITH SECURITY_ENFORCED];
 
 		// Create a set of Account Ids from the Opportunities
+		Set<Id> acctIds = new Set<Id>();
+		for(Opportunity opp : oppDetailsClosedWon) {
+			acctIds.add(opp.AccountId);
+		}
 
 		// Query the Contacts
+		List<Contact> myContacts = [SELECT Id, FirstName, AccountId
+									FROM Contact
+									WHERE AccountId IN :acctIds
+									WITH SECURITY_ENFORCED
+									ORDER By FirstName ASC];
 
 		// Loop through each Contact and add the Account Id and Contact to the map
+		Map<Id, Contact> accountToFirstContactMap = new Map<Id, Contact>();
+		for(Contact con : myContacts) {
+			if(!accountToFirstContactMap.containsKey(con.AccountId)){
+				accountToFirstContactMap.put(con.AccountId, con);
+			}
+		}
+		//Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>([SELECT Id, Primary_Contact__c FROM Opportunity]);
 
 		// Loop through each Opportunity
-
-		// Update the Opportunity primary contact from accountToContactMap
-
+		//Update the Opportunity primary contact from accountToContactMap
+		// Update the Opportunity primary contact from accountToContactMap		
+		List<Opportunity> oppsToUpdate = new List<Opportunity>();
+		for(Opportunity opp : oppDetailsClosedWon) {
+			Contact primaryContact = accountToFirstContactMap.get(opp.AccountId);
+			if(primaryContact != null) {
+				opp.Primary_Contact__c = primaryContact.Id;
+				oppsToUpdate.add(opp);
+			}
+		}
 		// Update the Opportunities
+		database.update(oppsToUpdate, accessLevel.USER_MODE);
 	}
 }
